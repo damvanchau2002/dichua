@@ -148,7 +148,7 @@ async function connectTikTok(uniqueId, apiKey){
   try {
     TikTokLib ||= await import('tiktok-live-connector');
     const { TikTokLiveConnection, WebcastEvent, ControlEvent, SignConfig } = TikTokLib;
-    const DEFAULT_EULER_KEY = 'euler_ZWVlMDE2NmYwOWFiNzkyOWIxOWIwOTUxYmZlZmQ1NDllNWZlNWZlYzA4ZmEzMzJjMWU1NGEx';
+    const DEFAULT_EULER_KEY = 'euler_NThhZmFhM2QzNzJkYWE5Zjk4NTY2Njc4MjIwZTI5MzkzNDk1NmQxNTYyOTJiN2VlYjdlNWFi';
     const key = apiKey || process.env.EULER_KEY || settings.eulerKey || DEFAULT_EULER_KEY;
     if (key) {
       SignConfig.apiKey = key;
