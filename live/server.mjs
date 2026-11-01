@@ -252,11 +252,15 @@ function setBots(on, n, pace){
 //    same browser cannot send control commands
 //  • static files: only /assets and /live, no dot-files, no node_modules, no server source, no path escapes
 //  • no TikTok password, cookie or session is ever used or stored; only public room events are read
-const HOST = process.env.HOST || '127.0.0.1';
+const HOST = process.env.HOST || '0.0.0.0';
 const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.css':'text/css', '.json':'application/json',
   '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp', '.mp3':'audio/mpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon' };
 const ALLOWED_HOSTS = new Set([`localhost:${PORT}`, `127.0.0.1:${PORT}`, `[::1]:${PORT}`]);
-const okHost = h => ALLOWED_HOSTS.has(String(h || '').toLowerCase());
+const okHost = h => {
+  if (!h) return true;
+  if (process.env.ALLOW_ALL_HOSTS === '1' || process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.PORT) return true;
+  return ALLOWED_HOSTS.has(String(h || '').toLowerCase());
+};
 const SEP = path.sep;
 function resolveStatic(urlPath){
   let p = urlPath === '/' ? '/live/control.html' : urlPath;
@@ -285,6 +289,7 @@ const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 64 * 1024,
   verifyClient: ({ origin, req }) => {
     if (!okHost(req.headers.host)) return false;
     if (!origin) return true;                                   // OBS / non-browser clients send no Origin
+    if (process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.PORT) return true;
     try { return okHost(new URL(origin).host); } catch { return false; }
   } });
 function broadcast(msg, only){ const s = JSON.stringify(msg); for (const c of wss.clients) if (c.readyState === 1 && (!only || c.role === only)) c.send(s); }

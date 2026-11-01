@@ -1,0 +1,15 @@
+{
+  "name": "chanh-dien-online",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Chánh Điện Tịnh Tâm - TikTok LIVE overlay & web",
+  "scripts": {
+    "start": "node live/server.mjs"
+  },
+  "dependencies": {
+    "msedge-tts": "2.1.1",
+    "tiktok-live-connector": "2.5.0",
+    "ws": "8.18.0"
+  }
+}
