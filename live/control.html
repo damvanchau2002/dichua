@@ -167,8 +167,13 @@ function connect(){
 }
 connect();
 
-if (localStorage.getItem('eulerKey')) {
-  $('eulerKey').value = localStorage.getItem('eulerKey');
+const CURRENT_DEFAULT_KEY = 'euler_NThhZmFhM2QzNzJkYWE5Zjk4NTY2Njc4MjIwZTI5MzkzNDk1NmQxNTYyOTJiN2VlYjdlNWFi';
+const savedKey = localStorage.getItem('eulerKey');
+if (savedKey && !savedKey.startsWith('euler_ZWVlMDE2')) {
+  $('eulerKey').value = savedKey;
+} else {
+  $('eulerKey').value = CURRENT_DEFAULT_KEY;
+  localStorage.setItem('eulerKey', CURRENT_DEFAULT_KEY);
 }
 
 const doConnect = () => {
