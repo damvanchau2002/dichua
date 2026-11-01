@@ -58,7 +58,9 @@ button.red{background:var(--red);border-color:#b84a33}
     <h2>1 · Kết nối TikTok LIVE</h2>
     <label for="uid">Username kênh đang live</label>
     <div class="row"><input id="uid" placeholder="@tenkenhcuaban" autocomplete="off"><button class="primary" id="btnConnect">Kết nối</button><button id="btnDisconnect">Ngắt</button></div>
-    <p class="hint">Chỉ đọc sự kiện công khai của phòng live (bình luận, quà, tim). Không cần mật khẩu hay cookie TikTok. Phải bật LIVE trước rồi mới kết nối.</p>
+    <label for="eulerKey" style="margin-top:10px">EulerStream API Key (Miễn phí, để vượt lớp bảo vệ của TikTok)</label>
+    <input id="eulerKey" placeholder="Dán API Key từ eulerstream.com (nếu có)" autocomplete="off">
+    <p class="hint">Đăng ký tài khoản miễn phí tại <a href="https://www.eulerstream.com" target="_blank" style="color:#d4af37;text-decoration:underline">eulerstream.com</a> để lấy API Key miễn phí (2.500 lượt/ngày). Không cần thẻ visa/mastercard.</p>
     <button class="gold" id="btnOverlay">Mở màn hình overlay 9:16</button>
     <p class="hint">Trong TikTok LIVE Studio: Add source → Window capture → chọn cửa sổ overlay. Bấm "bật âm thanh" một lần trong cửa sổ đó.</p>
     <h2>Trong sân chùa</h2>
@@ -165,8 +167,20 @@ function connect(){
 }
 connect();
 
-$('btnConnect').onclick = () => send('connect', { uniqueId: $('uid').value });
-$('uid').onkeydown = e => { if (e.key==='Enter') send('connect', { uniqueId: $('uid').value }); };
+if (localStorage.getItem('eulerKey')) {
+  $('eulerKey').value = localStorage.getItem('eulerKey');
+}
+
+const doConnect = () => {
+  const uniqueId = $('uid').value.trim();
+  const apiKey = $('eulerKey').value.trim();
+  if (apiKey) localStorage.setItem('eulerKey', apiKey);
+  if (uniqueId) send('connect', { uniqueId, apiKey });
+};
+
+$('btnConnect').onclick = doConnect;
+$('uid').onkeydown = e => { if (e.key==='Enter') doConnect(); };
+$('eulerKey').onkeydown = e => { if (e.key==='Enter') doConnect(); };
 $('btnDisconnect').onclick = () => send('disconnect');
 $('btnOverlay').onclick = () => window.open('/live/overlay.html', 'overlay916', 'width=540,height=960');
 $('btnChat').onclick = () => send('chat', { name: $('simName').value, text: $('simText').value });

@@ -140,15 +140,23 @@ scheduleChant();
 
 /* --------------------------------------------------------------- TikTok */
 let TikTokLib = null;
-async function connectTikTok(uniqueId){
+async function connectTikTok(uniqueId, apiKey){
   uniqueId = String(uniqueId || '').trim().replace(/^.*tiktok\.com\/@?/i, '').replace(/^@/, '').replace(/\/.*$/, '');
   if (!uniqueId) return;
   await disconnectTikTok();
   tiktokState = { status: 'connecting', uniqueId, error: '' }; broadcast({ t:'tiktok', ...tiktokState });
   try {
     TikTokLib ||= await import('tiktok-live-connector');
-    const { TikTokLiveConnection, WebcastEvent, ControlEvent } = TikTokLib;
-    const conn = new TikTokLiveConnection(uniqueId, { enableExtendedGiftInfo: true, processInitialData: false });
+    const { TikTokLiveConnection, WebcastEvent, ControlEvent, SignConfig } = TikTokLib;
+    const key = apiKey || process.env.EULER_KEY || settings.eulerKey;
+    if (key) {
+      SignConfig.apiKey = key;
+    }
+    const conn = new TikTokLiveConnection(uniqueId, {
+      enableExtendedGiftInfo: true,
+      processInitialData: false,
+      signApiKey: key || undefined
+    });
     const av = u => u?.profilePicture?.url?.[0] || u?.profilePicture?.urlList?.[0] || u?.avatarThumb?.urlList?.[0] || u?.avatarThumb?.url?.[0] || '';
     const nm = u => u?.nickname || u?.uniqueId || 'ẩn danh';
     conn.on(WebcastEvent.CHAT, d => onChat(d.user?.uniqueId || d.user?.userId, nm(d.user), d.comment, av(d.user)));
@@ -190,7 +198,7 @@ function clearSeats(){ viewers.clear(); broadcast(snapshot()); addLog('Đã làm
 /* ------------------------------------------------------------- control */
 function onControl(m){
   switch (m.cmd){
-    case 'connect': connectTikTok(m.uniqueId); break;
+    case 'connect': connectTikTok(m.uniqueId, m.apiKey); break;
     case 'disconnect': disconnectTikTok(); addLog('Đã ngắt kết nối TikTok'); break;
     case 'chat': { const n = String(m.name || 'Khách').slice(0, 18); onChat('sim_' + n, n, String(m.text || 'Nam mô A Di Đà Phật').slice(0, 120)); break; }
     case 'gift': { const n = String(m.name || 'Khách').slice(0, 18); onGift('sim_' + n, n, String(m.gift || 'Hoa hồng').slice(0, 30), clamp(m.count, 1, 99), clamp(m.diamonds, 1, 50000)); break; }
