@@ -154,7 +154,7 @@ async function connectTikTok(uniqueId, apiKey){
       SignConfig.apiKey = key;
     }
     const conn = new TikTokLiveConnection(uniqueId, {
-      enableExtendedGiftInfo: true,
+      enableExtendedGiftInfo: false,
       processInitialData: false,
       signApiKey: key || undefined
     });
@@ -162,10 +162,10 @@ async function connectTikTok(uniqueId, apiKey){
     const nm = u => u?.nickname || u?.uniqueId || 'ẩn danh';
     conn.on(WebcastEvent.CHAT, d => onChat(d.user?.uniqueId || d.user?.userId, nm(d.user), d.comment, av(d.user)));
     conn.on(WebcastEvent.GIFT, d => {
-      const type = d.giftDetails?.giftType ?? d.extendedGiftInfo?.type;
+      const type = d.giftDetails?.giftType ?? d.extendedGiftInfo?.type ?? d.giftType;
       if (type === 1 && !d.repeatEnd) return;                       // streak still running
-      const gname = d.giftDetails?.giftName || d.extendedGiftInfo?.name || 'quà';
-      const dia = d.giftDetails?.diamondCount ?? d.extendedGiftInfo?.diamond_count ?? 1;
+      const gname = d.giftDetails?.giftName || d.extendedGiftInfo?.name || d.giftName || 'quà';
+      const dia = d.giftDetails?.diamondCount ?? d.extendedGiftInfo?.diamond_count ?? d.diamondCount ?? 1;
       onGift(d.user?.uniqueId || d.user?.userId, nm(d.user), gname, d.repeatCount || 1, dia, av(d.user));
       addLog(`🎁 ${nm(d.user)} tặng ${gname} x${d.repeatCount || 1}`);
     });
